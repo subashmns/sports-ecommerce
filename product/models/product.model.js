@@ -6,11 +6,23 @@ const ProductSchema =  mongoose.schema(
             type: String, 
             required: true 
         },
-        description: { 
+        image: { 
+            type: String, 
+            required: true   
+        },
+        price: { 
+            type: Number, 
+            required: true 
+        },
+        quantity: { 
+            type: Number, 
+            required: true 
+        },
+        category: { 
             type: String, 
             required: true  
         },
-        category: { 
+        description: { 
             type: String, 
             required: true  
         },
@@ -26,21 +38,9 @@ const ProductSchema =  mongoose.schema(
             type: Number, 
             default: 0 
         },
-        image: { 
-            type: String, 
-            required: true   
-        },
         date: { 
             type: Date, 
             default: Date.now  
-        },
-        price: { 
-            type: Number, 
-            required: true 
-        },
-        quantity: { 
-            type: Number, 
-            required: true 
         }
     }
 )
