@@ -21,7 +21,7 @@ app.use('/', (req, res) => {
 
 app.use('/products', productRoute)
 
-mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(dbUrl)
 .then(() => {
     console.log("Connected to MongoDB");
     app.listen(PORT, () => {
