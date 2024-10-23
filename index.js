@@ -15,13 +15,13 @@ app.use(cors({
   origin: 'http://localhost:3000'
 }));
 
-// app.use('/', (req, res) => {
-//     res.send('Welcome to my API!');
-// })
+app.use('/', (req, res) => {
+    res.send('Welcome to my API!');
+})
 
 app.use('/products', productRoute)
 
-mongoose.connect(dbUrl)
+mongoose.connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 .then(() => {
     console.log("Connected to MongoDB");
     app.listen(PORT, () => {
