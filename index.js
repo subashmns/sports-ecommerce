@@ -6,7 +6,7 @@ require('dotenv').config();
 const cors = require('cors');
 
 const dbUrl = process.env.DATABASE_URL;
-const PORT = 5000;
+const PORT = 3000;
 
 app.use(express.json()); // to parse json data in request body
 app.use(express.urlencoded({ extended: false }));
@@ -25,7 +25,7 @@ mongoose.connect(dbUrl)
 .then(() => {
     console.log("Connected to MongoDB");
     app.listen(PORT, () => {
-      console.log("Server is running on port 5000 thanks");
+      console.log("Server is running on port 3000 thanks");
     });
   })
   .catch(() => {
