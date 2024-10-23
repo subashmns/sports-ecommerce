@@ -15,9 +15,9 @@ app.use(cors({
   origin: 'http://localhost:3000'
 }));
 
-app.use('/', (req, res) => {
-    res.send('Welcome to my API!');
-})
+// app.use('/', (req, res) => {
+//     res.send('Welcome to my API!');
+// })
 
 app.use('/products', productRoute)
 
