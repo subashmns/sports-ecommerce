@@ -1,47 +1,49 @@
 const mongoose = require('mongoose')
 
-const ProductSchema =  mongoose.schema(
+const ProductSchema =  mongoose.Schema(
     {
         name: { 
             type: String, 
-            required: true 
+            required: [true, 'Product name is required']
         },
         image: { 
             type: String, 
-            required: true   
+            required: [true, 'Product image is required']   
         },
         price: { 
             type: Number, 
-            required: true 
+            required: [true, 'Product price is required']
         },
         quantity: { 
             type: Number, 
-            required: true 
+            required: [true, 'Product quantity is required']
         },
         category: { 
             type: String, 
-            required: true  
+            required: [true, 'Product category is required']  
         },
         description: { 
             type: String, 
-            required: true  
+            required: [true, 'Product description is required']  
         },
         supplier: { 
             type: String, 
-            required: false   
+            required: [true, 'Product supplier is required']   
         },
         stock: { 
-            type: Number, 
-            required: true    
+            type: String, 
+            required: false   
         },
         rating: { 
-            type: Number, 
+            type: Number,
+            required: false,
+            min: 0,
+            max: 5,
             default: 0 
-        },
-        date: { 
-            type: Date, 
-            default: Date.now  
         }
+    },
+    {
+        timestamps: true,
     }
 )
 
