@@ -3,51 +3,47 @@ const bcrypt = require('bcryptjs');
 const { generateTokenAndSetCookie } = require('../utils/generateTokenAndSetCookie');
 // const { sendVerificationEmail, sendWelcomeEmail } = require('../mailtrap/emails');
 const signup = async (req, res) => {
-    const { name, email, password, role } = req.body;
-    
-    // Validate input fields
-    try{
-        if(!email || !password || !name){
-            throw new Error("All fields are required");
-        }
+  const { name, email, password, role } = req.body;
+  
+  // Validate input fields
+  try {
+      if (!email || !password || !name || !role ) {
+          throw new Error("All fields are required");
+      }
+      const userAlreadyExists = await User.findOne({ email });
 
-        const userAlreadyExists = await User.findOne({ email });
+      if (userAlreadyExists) {
+          return res.status(400).json({ success: false, message: "User already exists" });
+      }
 
-        if(userAlreadyExists){
-            return res.status(400).json({success: false, message: "User already exists"});
-        }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = new User({
+          name,
+          email,
+          password: hashedPassword,
+          role
+      });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({
-            email,
-            password: hashedPassword,
-            name,
-            role
-        })
+      await user.save();
 
-        await user.save();
+      // Generate JWT Token and Set Cookie
+      const token = generateTokenAndSetCookie(res, user._id);
 
-        // jwt 
-        const token = generateTokenAndSetCookie(res, user._id);
-
-        // await sendVerificationEmail(user.email, verificationToken)
-
-        res.status(200).json({
-            success: true, 
-            message: "User created successfully", 
-            token,
-            user:{
-                ...user._doc,
-                password: undefined,
-        },
-    });
-        
-    }catch(error){
-        console.log("Invalid to create user");
-        res.status(400).json({success: false, message: error.message});
-    }
-}
-
+      // Send successful response
+      res.status(200).json({
+          success: true,
+          message: "User created successfully",
+          token,
+          user: {
+              ...user._doc,
+              password: undefined  // Ensure password is not included in the response
+          }
+      });
+  } catch (error) {
+      console.error(error.stack); // Log error for better understanding
+      res.status(400).json({ success: false, message: error.message });
+  }
+};
 // const verifyEmail = async (req, res) =>{
 //     const {code} = req.body;
 //     try{
