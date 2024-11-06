@@ -26,13 +26,14 @@ const ProductSchema =  mongoose.Schema(
             type: String, 
             required: [true, 'Product description is required']  
         },
-        supplier: { 
-            type: String, 
-            required: [true, 'Product supplier is required']   
+        seller: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: [true, 'Product seller is required']
         },
         stock: { 
             type: String, 
-            required: false   
+            default: "in stock"
         },
         rating: { 
             type: Number,
