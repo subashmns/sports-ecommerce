@@ -17,10 +17,11 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({
-  origin: '*', // Change this to your frontend domain
-  methods: ['GET', 'POST','PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type'],
+  origin: 'http://localhost:3000', // Allow only your frontend domain
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
 
 // Routes
 app.use('/products', productRoute);
