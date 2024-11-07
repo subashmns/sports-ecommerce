@@ -10,17 +10,19 @@ const sellerProduct = require('./seller/seller.route/seller.route');
 
 dotenv.config();
 
+
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cors({
   origin: '*', // Change this to your frontend domain
   methods: ['GET', 'POST','PUT', 'DELETE'],
   allowedHeaders: ['Content-Type'],
 }));
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
 
 // Routes
 app.use('/products', productRoute);

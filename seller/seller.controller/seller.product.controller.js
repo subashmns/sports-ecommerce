@@ -3,7 +3,7 @@ const { User } = require('../../customer/models/user.model');
 
 const addProduct = async (req, res) => {
     try {
-        const { sellerId } = req.query;
+        const { sellerId } = req.body;
         const { name, price, category, image, quantity, description } = req.body;
 
         const seller = await User.findById(sellerId || req.user.id);
@@ -23,7 +23,7 @@ const addProduct = async (req, res) => {
             quantity,
             category,
             image,
-            seller: req.user.id,
+            seller: sellerId,
         });
 
         res.status(201).json({ success: true, message: 'Product added successfully', product });
