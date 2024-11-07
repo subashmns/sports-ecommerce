@@ -3,8 +3,7 @@ const { User } = require('../../customer/models/user.model');
 
 const addProduct = async (req, res) => {
     try {
-        const { sellerId } = req.body;
-        const { name, price, category, image, quantity, description } = req.body;
+        const { name, price, category, image, quantity, description, sellerId } = req.body;
 
         const seller = await User.findById(sellerId || req.user.id);
 
