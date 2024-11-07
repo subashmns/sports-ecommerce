@@ -11,7 +11,7 @@ const { protect } = require('../tokenVerify/tokenVerify')
 
 const router = express.Router();
 
-router.post('/add', addProduct); // Seller adds a product
+router.post('/add',protect, addProduct); // Seller adds a product
 router.get('/products',protect, getSellerProducts); // Seller views their products
 router.put('/product/:productId',protect, updateProduct); // Seller updates a product
 router.delete('/product/:productId',protect, deleteProduct); // Seller deletes a product
