@@ -22,10 +22,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Handle preflight requests
-app.options('*', cors());
-
-
 
 // Routes
 app.use('/products', productRoute);

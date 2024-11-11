@@ -5,7 +5,7 @@ const addProduct = async (req, res) => {
     try {
         const { name, price, category, image, quantity, description, sellerId } = req.body;
 
-        const seller = await User.findById(sellerId || req.user.id);
+        const seller = await User.findById(sellerId);
 
         if (!seller || seller.role !== 'seller') {
             return res.status(403).json({ message: 'Only sellers can add products' });
@@ -35,7 +35,7 @@ const addProduct = async (req, res) => {
 const getSellerProducts = async (req, res) => {
     try {
         const { sellerId } = req.query;
-        const products = await Product.find({ seller: sellerId }).exec();
+        const products = await Product.find({ seller: sellerId });
 
         if (!products.length) {
             return res.status(404).json({ message: 'No products found for this seller' });

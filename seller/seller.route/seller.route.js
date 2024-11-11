@@ -9,10 +9,19 @@ const {
 
 const router = express.Router();
 
-router.post('/add', addProduct); // Seller adds a product
-router.get('/products', getSellerProducts); // Seller views their products
-router.put('/product/:productId', updateProduct); // Seller updates a product
-router.delete('/product/:productId', deleteProduct); // Seller deletes a product
-router.get('/products/:productId', getSellerProductById) ; //seller gets its product by id
+// Route to add a new product (POST /seller/:sellerId/products)
+router.post('/add', addProduct); 
+
+// Route to view all products by a specific seller (GET /seller/:sellerId/products)
+router.get('/products/:sellerId/:products', getSellerProducts); 
+
+// Route to get a specific product by productId for a seller (GET /seller/:sellerId/products/:productId)
+router.get('/:sellerId/products/:productId', getSellerProductById);
+
+// Route to update a specific product (PUT /seller/:sellerId/products/:productId)
+router.put('/:sellerId/products/:productId', updateProduct); 
+
+// Route to delete a specific product (DELETE /seller/:sellerId/products/:productId)
+router.delete('/:sellerId/products/:productId', deleteProduct); 
 
 module.exports = router;
