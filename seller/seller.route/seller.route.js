@@ -13,7 +13,7 @@ const router = express.Router();
 router.post('/add', addProduct); 
 
 // Route to view all products by a specific seller (GET /seller/:sellerId/products)
-router.get('/products/?sellerId', getSellerProducts); 
+router.get('/products/:sellerId', getSellerProducts); 
 
 // Route to get a specific product by productId for a seller (GET /seller/:sellerId/products/:productId)
 router.get('/:sellerId/products/:productId', getSellerProductById);

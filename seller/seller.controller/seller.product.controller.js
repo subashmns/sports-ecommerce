@@ -34,7 +34,7 @@ const addProduct = async (req, res) => {
 
 const getSellerProducts = async (req, res) => {
     try {
-        const { sellerId} = req.query;
+        const { sellerId} = req.params;
         const products = await Product.find({ seller: sellerId });
 
         if (!products.length) {
