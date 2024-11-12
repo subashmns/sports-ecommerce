@@ -6,7 +6,7 @@ const multer = require('multer');
 // Set up storage for files
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'backend/uploads/'); // Specify folder to save files
+        cb(null, path.join(__dirname, '../../seller/uploads')); // Specify folder to save files
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`); // Add timestamp to filename
@@ -18,24 +18,26 @@ const upload = multer({ storage: storage }).array('images', 5); // Limit to 5 fi
 
 const createProduct = async (req, res) => {
     try {
-        const { name, price, category, quantity, description } = req.body;
-        const imageFiles = req.files;
-
-        let imagePaths = [];
-        if (imageFiles) {
-            imageFiles.forEach((file) => {
-                imagePaths.push(file.path); // Save the paths of uploaded files
-            });
+        const { name, price, category, quantity, description, sellerId } = req.body;
+        const images = req.files;
+    
+        // Validate required fields
+        if (!name || !price || !category || !quantity || !description || !sellerId || !images || images.length === 0) {
+            return res.status(400).json({ message: 'All fields including images are required.' });
         }
 
-        // Save product with image paths
+        // Map image file data to save only paths
+        const imagePaths = images.map(file => ({ url: file.path }));
+
+        // Create and save product
         const product = new Product({
             name,
             price,
             category,
             quantity,
             description,
-            images: imagePaths, // Store an array of file paths
+            seller: sellerId,
+            images: imagePaths,
         });
 
         await product.save();

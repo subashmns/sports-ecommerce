@@ -10,6 +10,10 @@ const ProductSchema = new mongoose.Schema(
         },
         images: [
             {
+                url: { 
+                    type: String, // Store the URL/path of the image
+                    required: [true, 'Image URL is required']
+                },
                 isLocal: { 
                     type: Boolean, 
                     default: true // Indicates that the image is stored locally
