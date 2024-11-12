@@ -1,42 +1,52 @@
+// backend/controllers/product.controller.js
+
 const Product = require('../models/product.model');
+const multer = require('multer');
+
+// Set up storage for files
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'backend/uploads/'); // Specify folder to save files
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}-${file.originalname}`); // Add timestamp to filename
+    },
+});
+
+// Multer setup to accept multiple files
+const upload = multer({ storage: storage }).array('images', 5); // Limit to 5 files per upload
 
 const createProduct = async (req, res) => {
     try {
-        const images = [];
+        const { name, price, category, quantity, description } = req.body;
+        const imageFiles = req.files;
 
-        // If files are uploaded, add them to images array with `isLocal` flag
-        if (req.files) {
-            req.files.forEach(file => {
-                images.push({
-                    url: file.path,  // Local path to the image file
-                    isLocal: true
-                });
+        let imagePaths = [];
+        if (imageFiles) {
+            imageFiles.forEach((file) => {
+                imagePaths.push(file.path); // Save the paths of uploaded files
             });
         }
 
-        // If external image URLs are provided in the request body
-        if (req.body.externalImages) {
-            const externalImages = JSON.parse(req.body.externalImages);
-            externalImages.forEach(url => {
-                images.push({
-                    url,
-                    isLocal: false  // Indicates it's an external URL
-                });
-            });
-        }
+        // Save product with image paths
+        const product = new Product({
+            name,
+            price,
+            category,
+            quantity,
+            description,
+            images: imagePaths, // Store an array of file paths
+        });
 
-        // Create product with images array included
-        const productData = {
-            ...req.body,
-            images  // Merging images (both local and URLs) into product data
-        };
-
-        const product = await Product.create(productData);
+        await product.save();
         res.status(200).json(product);
-    } catch (err) {
-        res.status(500).json({ Message: err.message });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
-}
+};
+
+
 
 const getProducts = async (req, res) => {
     try{
