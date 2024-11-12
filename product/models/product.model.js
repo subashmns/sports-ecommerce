@@ -10,10 +10,18 @@ const ProductSchema =  mongoose.Schema(
             type: String, 
             required: [true, 'Product image is required']   
         },
-        price: { 
-            type: Number, 
-            required: [true, 'Product price is required']
-        },
+        images: [
+            {
+                url: { 
+                    type: String, 
+                    required: [true, 'Image URL is required'] 
+                },
+                isLocal: { 
+                    type: Boolean, 
+                    default: false // Set to `true` for local images
+                }
+            }
+        ],
         quantity: { 
             type: Number, 
             required: [true, 'Product quantity is required']

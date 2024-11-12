@@ -1,11 +1,39 @@
 const Product = require('../models/product.model');
 
 const createProduct = async (req, res) => {
-    try{
-        const product = await Product.create(req.body);
+    try {
+        const images = [];
+
+        // If files are uploaded, add them to images array with `isLocal` flag
+        if (req.files) {
+            req.files.forEach(file => {
+                images.push({
+                    url: file.path,  // Local path to the image file
+                    isLocal: true
+                });
+            });
+        }
+
+        // If external image URLs are provided in the request body
+        if (req.body.externalImages) {
+            const externalImages = JSON.parse(req.body.externalImages);
+            externalImages.forEach(url => {
+                images.push({
+                    url,
+                    isLocal: false  // Indicates it's an external URL
+                });
+            });
+        }
+
+        // Create product with images array included
+        const productData = {
+            ...req.body,
+            images  // Merging images (both local and URLs) into product data
+        };
+
+        const product = await Product.create(productData);
         res.status(200).json(product);
-    }
-    catch(err){
+    } catch (err) {
         res.status(500).json({ Message: err.message });
     }
 }
