@@ -50,7 +50,7 @@ const getSellerProducts = async (req, res) => {
 
 const updateProduct = async (req, res) => {
     try {
-        const { sellerId, productId } = req.query;
+        const { sellerId, productId } = req.params;
         const { name, price, category, image, description, quantity } = req.body;
 
         const product = await Product.findOneAndUpdate(

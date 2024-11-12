@@ -16,12 +16,12 @@ router.post('/add', addProduct);
 router.get('/products/:sellerId', getSellerProducts); 
 
 // Route to get a specific product by productId for a seller (GET /seller/:sellerId/products/:productId)
-router.get('/:sellerId/products/:productId', getSellerProductById);
+router.get('/products/:sellerId/:productId', getSellerProductById);
 
 // Route to update a specific product (PUT /seller/:sellerId/products/:productId)
 router.put('/:sellerId/products/:productId', updateProduct); 
 
 // Route to delete a specific product (DELETE /seller/:sellerId/products/:productId)
-router.delete('/:sellerId/products/:productId', deleteProduct); 
+router.delete('/products/:sellerId/:productId', deleteProduct); 
 
 module.exports = router;
