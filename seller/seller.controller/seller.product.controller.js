@@ -7,11 +7,11 @@ const { User } = require('../../customer/models/user.model');
 // Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'public/uploads')); // Store files in an absolute path
+        cb(null, path.join(__dirname, '../uploads')); // Store files in an absolute path
     },
     filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' `${Date.now()} + ${path.extname(file.originalname)}`); // Unique filename
-    }
+        cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
+    },
 });
 
 const upload = multer({ 
