@@ -6,26 +6,11 @@ const {
     updateProduct, 
     getSellerProductById
 } = require('../seller.controller/seller.product.controller');
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/'})
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'public/uploads')); // Store files in an absolute path
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' `${Date.now()} + ${path.extname(file.originalname)}`); // Unique filename
-    }
-});
-
-const multipleUpload = upload.fields([{name: 'file1', maxCount:10}])
 
 const router = express.Router();
 
 // Route to add a new product (POST /seller/:sellerId/products)
-router.post('/add',multipleUpload, addProduct); 
+router.post('/add', addProduct); 
 
 // Route to view all products by a specific seller (GET /seller/:sellerId/products)
 router.get('/products/:sellerId', getSellerProducts); 

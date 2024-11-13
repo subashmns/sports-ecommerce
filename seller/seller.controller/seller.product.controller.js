@@ -1,26 +1,32 @@
-
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 const Product = require('../../product/models/product.model');
 const { User } = require('../../customer/models/user.model');
-const fs = require('fs');
 
 // Multer setup for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, 'public/uploads')); // Store files in an absolute path
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' `${Date.now()} + ${path.extname(file.originalname)}`); // Unique filename
+    }
+});
 
-
-// const upload = multer({ storage : storage }); // Use the storage middleware
-
-// const upload = multer({ 
-//     storage: storage, 
-//     fileFilter: (req, file, cb) => {
-//         const filetypes = /jpeg|jpg|png|gif/; // Allowed file types
-//         const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-//         const mimetype = filetypes.test(file.mimetype);
-//         if (extname && mimetype) {
-//             return cb(null, true);
-//         } else {
-//             cb('Error: Images only!');
-//         }
-//     }
-// }).array('images', 5); // Accept multiple files with a limit of 5
+const upload = multer({ 
+    storage: storage, 
+    fileFilter: (req, file, cb) => {
+        const filetypes = /jpeg|jpg|png|gif/; // Allowed file types
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+        if (extname && mimetype) {
+            return cb(null, true);
+        } else {
+            cb('Error: Images only!');
+        }
+    }
+}).array('images', 5); // Accept multiple files with a limit of 5
 
 // Helper function to delete images from the server
 const deleteProductImages = (imagePaths) => {
@@ -36,8 +42,8 @@ const deleteProductImages = (imagePaths) => {
 const addProduct = async (req, res) => {
     try {
         // Upload images
-        
-            if (!req.files) {
+        upload(req, res, async (err) => {
+            if (err) {
                 return res.status(400).json({ message: err });
             }
 
@@ -66,7 +72,7 @@ const addProduct = async (req, res) => {
             });
 
             res.status(201).json({ success: true, message: 'Product added successfully', product });
-       
+        });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: 'Server error' });
