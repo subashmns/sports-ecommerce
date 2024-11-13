@@ -1,12 +1,13 @@
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 const Product = require('../../product/models/product.model');
 const { User } = require('../../customer/models/user.model');
-const multer = require('multer');
-const path = require('path');
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, '../uploads'); // Folder where files will be stored
+        cb(null, path.join(__dirname, '../../uploads')); // Store files in an absolute path
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
@@ -25,7 +26,16 @@ const upload = multer({
             cb('Error: Images only!');
         }
     }
-}).array('images', 5); // Accepting multiple files with a limit of 5
+}).array('images', 5); // Accept multiple files with a limit of 5
+
+// Helper function to delete images from the server
+const deleteProductImages = (imagePaths) => {
+    imagePaths.forEach((filePath) => {
+        fs.unlink(filePath, (err) => {
+            if (err) console.error(`Error deleting file: ${filePath}`, err);
+        });
+    });
+};
 
 // Controller functions
 
@@ -96,16 +106,16 @@ const updateProduct = async (req, res) => {
                 return res.status(400).json({ message: err });
             }
 
+            const updateData = { name, price, category, description, quantity };
+
+            // Only update images if new files are uploaded
+            if (req.files.length > 0) {
+                updateData.images = req.files.map(file => file.path);
+            }
+
             const product = await Product.findOneAndUpdate(
                 { _id: productId, seller: sellerId },
-                {
-                    name,
-                    price,
-                    category,
-                    description,
-                    quantity,
-                    images: req.files.map(file => file.path), // Update image paths
-                },
+                updateData,
                 { new: true }
             );
 
@@ -129,6 +139,9 @@ const deleteProduct = async (req, res) => {
         if (!product) {
             return res.status(404).json({ message: 'Product not found or unauthorized' });
         }
+
+        // Delete product images from server
+        deleteProductImages(product.images);
 
         res.status(200).json({ success: true, message: 'Product deleted successfully' });
     } catch (error) {
