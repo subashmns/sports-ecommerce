@@ -1,36 +1,42 @@
 const express = require('express');
-const multer = require('multer');
+const { 
+    addProduct, 
+    getSellerProducts, 
+    deleteProduct, 
+    updateProduct, 
+    getSellerProductById
+} = require('../seller.controller/seller.product.controller');
+const fs = require('fs');
 const path = require('path');
-const { addProduct, getSellerProducts, deleteProduct, updateProduct, getSellerProductById } = require('../seller.controller/seller.product.controller');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/'})
 
-// Set up multer storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../public/uploads'));
+        cb(null, path.join(__dirname, 'public/uploads')); // Store files in an absolute path
     },
     filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+        cb(null, file.fieldname + '-' `${Date.now()} + ${path.extname(file.originalname)}`); // Unique filename
     }
 });
 
-const upload = multer({ storage: storage });
+const multipleUpload = upload.fields([{name: 'file1', maxCount:10}])
 
-// Set up routes
 const router = express.Router();
 
-// Route to add a new product
-router.post('/add', upload.array('images', 5), addProduct);
+// Route to add a new product (POST /seller/:sellerId/products)
+router.post('/add',multipleUpload, addProduct); 
 
-// Route to get all products by seller
-router.get('/products/:sellerId', getSellerProducts);
+// Route to view all products by a specific seller (GET /seller/:sellerId/products)
+router.get('/products/:sellerId', getSellerProducts); 
 
-// Route to get a specific product by productId for a seller
+// Route to get a specific product by productId for a seller (GET /seller/:sellerId/products/:productId)
 router.get('/products/:sellerId/:productId', getSellerProductById);
 
-// Route to update a specific product
-router.put('/products/:sellerId/:productId', upload.array('images', 5), updateProduct);
+// Route to update a specific product (PUT /seller/:sellerId/products/:productId)
+router.put('/:sellerId/products/:productId', updateProduct); 
 
-// Route to delete a product
-router.delete('/products/:sellerId/:productId', deleteProduct);
+// Route to delete a specific product (DELETE /seller/:sellerId/products/:productId)
+router.delete('/products/:sellerId/:productId', deleteProduct); 
 
 module.exports = router;
