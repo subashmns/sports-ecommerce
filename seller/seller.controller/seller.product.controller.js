@@ -44,6 +44,7 @@ const addProduct = async (req, res) => {
         // Upload images
         upload(req, res, async (err) => {
             if (err) {
+                console.log("Multer Error: " + err.message)
                 return res.status(400).json({ message: err });
             }
 
