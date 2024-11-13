@@ -4,10 +4,16 @@ const multer = require('multer');
 const Product = require('../../product/models/product.model');
 const { User } = require('../../customer/models/user.model');
 
+// Check if upload directory exists, create if not
+const uploadDir = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
 // Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../../uploads')); // Store files in an absolute path
+        cb(null, uploadDir); // Store files in an absolute path
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
@@ -23,7 +29,7 @@ const upload = multer({
         if (extname && mimetype) {
             return cb(null, true);
         } else {
-            cb('Error: Images only!');
+            cb(new Error('Error: Images only!'));
         }
     }
 }).array('images', 5); // Accept multiple files with a limit of 5
@@ -31,22 +37,23 @@ const upload = multer({
 // Helper function to delete images from the server
 const deleteProductImages = (imagePaths) => {
     imagePaths.forEach((filePath) => {
-        fs.unlink(filePath, (err) => {
-            if (err) console.error(`Error deleting file: ${filePath}`, err);
-        });
+        if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+                if (err) console.error(`Error deleting file: ${filePath}`, err);
+            });
+        }
     });
 };
 
 // Controller functions
 
+// Add Product
 const addProduct = async (req, res) => {
-    try {
-        // Upload images
-        upload(req, res, async (err) => {
-            if (err) {
-                return res.status(400).json({ message: err });
-            }
-
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+        try {
             const { name, price, category, quantity, description, sellerId } = req.body;
             const seller = await User.findById(sellerId);
 
@@ -72,13 +79,14 @@ const addProduct = async (req, res) => {
             });
 
             res.status(201).json({ success: true, message: 'Product added successfully', product });
-        });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: 'Server error' });
-    }
+        } catch (error) {
+            console.error(error.message);
+            res.status(500).json({ message: 'Server error' });
+        }
+    });
 };
 
+// Get Products for Seller
 const getSellerProducts = async (req, res) => {
     try {
         const { sellerId } = req.params;
@@ -95,21 +103,20 @@ const getSellerProducts = async (req, res) => {
     }
 };
 
+// Update Product
 const updateProduct = async (req, res) => {
-    try {
-        const { sellerId, productId } = req.params;
-        const { name, price, category, description, quantity } = req.body;
-        
-        // Upload images
-        upload(req, res, async (err) => {
-            if (err) {
-                return res.status(400).json({ message: err });
-            }
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+        try {
+            const { sellerId, productId } = req.params;
+            const { name, price, category, description, quantity } = req.body;
 
             const updateData = { name, price, category, description, quantity };
 
             // Only update images if new files are uploaded
-            if (req.files.length > 0) {
+            if (req.files && req.files.length > 0) {
                 updateData.images = req.files.map(file => file.path);
             }
 
@@ -124,13 +131,14 @@ const updateProduct = async (req, res) => {
             }
 
             res.status(200).json({ success: true, message: 'Product updated successfully', product });
-        });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: 'Server error' });
-    }
+        } catch (error) {
+            console.error(error.message);
+            res.status(500).json({ message: 'Server error' });
+        }
+    });
 };
 
+// Delete Product
 const deleteProduct = async (req, res) => {
     try {
         const { sellerId, productId } = req.params;
@@ -150,6 +158,7 @@ const deleteProduct = async (req, res) => {
     }
 };
 
+// Get Specific Product by Seller
 const getSellerProductById = async (req, res) => {
     try {
         const { sellerId, productId } = req.params;
