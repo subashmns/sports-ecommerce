@@ -1,27 +1,36 @@
 const express = require('express');
-const { 
-    addProduct, 
-    getSellerProducts, 
-    deleteProduct, 
-    updateProduct, 
-    getSellerProductById
-} = require('../seller.controller/seller.product.controller');
+const multer = require('multer');
+const path = require('path');
+const { addProduct, getSellerProducts, deleteProduct, updateProduct, getSellerProductById } = require('../seller.controller/seller.product.controller');
 
+// Set up multer storage
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '../public/uploads'));
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// Set up routes
 const router = express.Router();
 
-// Route to add a new product (POST /seller/:sellerId/products)
-router.post('/add', addProduct); 
+// Route to add a new product
+router.post('/add', upload.array('images', 5), addProduct);
 
-// Route to view all products by a specific seller (GET /seller/:sellerId/products)
-router.get('/products/:sellerId', getSellerProducts); 
+// Route to get all products by seller
+router.get('/products/:sellerId', getSellerProducts);
 
-// Route to get a specific product by productId for a seller (GET /seller/:sellerId/products/:productId)
+// Route to get a specific product by productId for a seller
 router.get('/products/:sellerId/:productId', getSellerProductById);
 
-// Route to update a specific product (PUT /seller/:sellerId/products/:productId)
-router.put('/:sellerId/products/:productId', updateProduct); 
+// Route to update a specific product
+router.put('/products/:sellerId/:productId', upload.array('images', 5), updateProduct);
 
-// Route to delete a specific product (DELETE /seller/:sellerId/products/:productId)
-router.delete('/products/:sellerId/:productId', deleteProduct); 
+// Route to delete a product
+router.delete('/products/:sellerId/:productId', deleteProduct);
 
 module.exports = router;
