@@ -2,11 +2,17 @@ const Product = require('../../product/models/product.model');
 const { User } = require('../../customer/models/user.model');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+const uploadDir = path.resolve(__dirname, '../../uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.resolve(__dirname, '../../uploads')); // Use absolute path
+        cb(null, uploadDir); // Use absolute path
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
@@ -34,10 +40,10 @@ const upload = multer({
 const addProduct = async (req, res) => {
     try {
         upload(req, res, async (err) => {
-            // if (err) {
-            //     console.log('Error in multer upload:', err.message);
-            //     return res.status(400).json({ message: err.message });
-            // }
+            if (err) {
+                console.log('Error in multer upload:', err.message);
+                return res.status(400).json({ message: err.message });
+            }
             console.log('Multer upload success, files:', req.files);
             console.log('Request body:', req.body);
 
