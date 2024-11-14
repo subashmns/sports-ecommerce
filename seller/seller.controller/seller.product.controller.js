@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ 
+const upload = multer({
     storage: storage, 
     fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif/;
@@ -48,11 +48,11 @@ const addProduct = async (req, res) => {
                 return res.status(403).json({ message: 'Only sellers can add products' });
             }
 
-            if (!name || !price || !category || !quantity || !description) {
+            const imagePaths = req.files.map(file => file.path);
+
+            if (!name || !price || !category || !quantity || !description || !imagePaths) {
                 return res.status(400).json({ message: 'All fields are required' });
             }
-
-            const imagePaths = req.files.map(file => file.path);
 
             const product = await Product.create({
                 name,
