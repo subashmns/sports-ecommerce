@@ -6,35 +6,36 @@ const path = require('path');
 // Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, '../uploads'); // Folder where files will be stored
+        cb(null, path.resolve(__dirname, '../../uploads')); // Use absolute path
     },
     filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
+        cb(null, `${Date.now()}-${file.originalname}`);
     },
 });
 
 const upload = multer({ 
     storage: storage, 
+    limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5 MB
     fileFilter: (req, file, cb) => {
-        const filetypes = /jpeg|jpg|png|gif/; // Allowed file types
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+
         if (extname && mimetype) {
-            return cb(null, true);
+            cb(null, true);
         } else {
-            cb('Error: Images only!');
+            cb(new Error('Only images are allowed!'));
         }
     }
-}).array('images', 5); // Accepting multiple files with a limit of 5
+}).array('images', 5); // Maximum of 5 files
 
 // Controller functions
 
 const addProduct = async (req, res) => {
     try {
-        // Upload images
         upload(req, res, async (err) => {
             if (err) {
-                return res.status(400).json({ message: err });
+                return res.status(400).json({ message: err.message });
             }
 
             const { name, price, category, quantity, description, sellerId } = req.body;
@@ -48,7 +49,6 @@ const addProduct = async (req, res) => {
                 return res.status(400).json({ message: 'All fields are required' });
             }
 
-            // Get the uploaded image paths
             const imagePaths = req.files.map(file => file.path);
 
             const product = await Product.create({
@@ -57,7 +57,7 @@ const addProduct = async (req, res) => {
                 price,
                 quantity,
                 category,
-                images: imagePaths, // Store image paths
+                images: imagePaths,
                 seller: sellerId,
             });
 
@@ -89,23 +89,17 @@ const updateProduct = async (req, res) => {
     try {
         const { sellerId, productId } = req.params;
         const { name, price, category, description, quantity } = req.body;
-        
-        // Upload images
+
         upload(req, res, async (err) => {
             if (err) {
-                return res.status(400).json({ message: err });
+                return res.status(400).json({ message: err.message });
             }
+
+            const imagePaths = req.files.map(file => file.path);
 
             const product = await Product.findOneAndUpdate(
                 { _id: productId, seller: sellerId },
-                {
-                    name,
-                    price,
-                    category,
-                    description,
-                    quantity,
-                    images: req.files.map(file => file.path), // Update image paths
-                },
+                { name, price, category, description, quantity, images: imagePaths },
                 { new: true }
             );
 
