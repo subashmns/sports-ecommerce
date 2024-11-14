@@ -35,8 +35,11 @@ const addProduct = async (req, res) => {
     try {
         upload(req, res, async (err) => {
             if (err) {
+                console.log('Error in multer upload:', err.message);
                 return res.status(400).json({ message: err.message });
             }
+            console.log('Multer upload success, files:', req.files);
+            console.log('Request body:', req.body);
 
             const { name, price, category, quantity, description, sellerId } = req.body;
             const seller = await User.findById(sellerId);
