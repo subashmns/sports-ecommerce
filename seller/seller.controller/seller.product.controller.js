@@ -1,27 +1,20 @@
-const fs = require('fs');
 const Product = require('../../product/models/product.model');
 const { User } = require('../../customer/models/user.model');
 const multer = require('multer');
 const path = require('path');
 
-// Ensure the uploads directory exists
-const uploadDir = path.resolve(__dirname, '../../uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
 // Multer setup for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir);
+        cb(null, path.resolve(__dirname, '../../uploads')); // Use absolute path
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
     },
 });
 
-const upload = multer({
-    storage: storage,
+const upload = multer({ 
+    storage: storage, 
     fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|gif/;
         const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -32,15 +25,15 @@ const upload = multer({
         } else {
             cb(new Error('Only images are allowed!'));
         }
-    },
+    }
 }).array('images', 5); // Maximum of 5 files
 
 // Controller functions
+
 const addProduct = async (req, res) => {
     try {
         upload(req, res, async (err) => {
             if (err) {
-                console.error('Multer Error:', err.message);
                 return res.status(400).json({ message: err.message });
             }
 
@@ -74,9 +67,6 @@ const addProduct = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
-
-// Similar changes can be applied to other functions as needed
-
 
 const getSellerProducts = async (req, res) => {
     try {
