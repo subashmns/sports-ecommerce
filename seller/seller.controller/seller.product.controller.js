@@ -30,6 +30,7 @@ const upload = multer({
 
 // Controller functions
 
+
 const addProduct = async (req, res) => {
     try {
         upload(req, res, async (err) => {
@@ -64,7 +65,7 @@ const addProduct = async (req, res) => {
         });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: error.message });
     }
 };
 
