@@ -1,43 +1,11 @@
 const Product = require('../../product/models/product.model');
 const { User } = require('../../customer/models/user.model');
-const multer = require('multer');
-const path = require('path');
-
-// Multer setup for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.resolve(__dirname, '../../uploads')); // Use absolute path
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    },
-});
-
-const upload = multer({ 
-    storage: storage, 
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-
-        if (extname && mimetype) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only images are allowed!'));
-        }
-    }
-}).array('images', 5); // Maximum of 5 files
 
 // Controller functions
 
 
 const addProduct = async (req, res) => {
     try {
-        upload(req, res, async (err) => {
-            if (err) {
-                return res.status(400).json({ message: err.message });
-            }
-
             const { name, price, category, quantity, description, sellerId } = req.body;
             const seller = await User.findById(sellerId);
 
@@ -62,7 +30,6 @@ const addProduct = async (req, res) => {
             });
 
             res.status(201).json({ success: true, message: 'Product added successfully', product });
-        });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: error.message });
