@@ -15,51 +15,41 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage
-}).array('images', 5);
-// Maximum of 5 files
+}).array('images', 5); // Maximum of 5 files
 
 // Controller functions
-
-
 const addProduct = async (req, res) => {
     try {
-        upload(req, res, async (err) => {
-            // if (err) {
-            //     console.log('Error in multer upload:', err.message);
-            //     return res.status(400).json({ message: err.message });
-            // }
-            console.log('Multer upload success, files:', req.files);
-            console.log('Request body:', req.body);
+        console.log('Multer upload success, files:', req.files); // Verify if files exist
+        console.log('Request body:', req.body);
 
-            const { name, price, category, quantity, description, sellerId } = req.body;
-            const seller = await User.findById(sellerId);
+        const { name, price, category, quantity, description, sellerId } = req.body;
+        const seller = await User.findById(sellerId);
 
-            if (!seller || seller.role !== 'seller') {
-                return res.status(403).json({ message: 'Only sellers can add products' });
-            }
+        if (!seller || seller.role !== 'seller') {
+            return res.status(403).json({ message: 'Only sellers can add products' });
+        }
 
-            const imagePaths = req.files.map(file => file.path);
+        const imagePaths = req.files ? req.files.map(file => file.path) : [];
 
-            if (!name || !price || !category || !quantity || !description || !imagePaths) {
-                return res.status(400).json({ message: 'All fields are required' });
-            }
+        if (!name || !price || !category || !quantity || !description || imagePaths.length === 0) {
+            return res.status(400).json({ message: 'All fields, including images, are required' });
+        }
 
-            const product = await Product.create({
-                name,
-                description,
-                price,
-                quantity,
-                category,
-                images: imagePaths,
-                seller: sellerId,
-            });
-
-            res.status(201).json({ success: true, message: 'Product added successfully', product });
+        const product = await Product.create({
+            name,
+            description,
+            price,
+            quantity,
+            category,
+            images: imagePaths,
+            seller: sellerId,
         });
+
+        res.status(201).json({ success: true, message: 'Product added successfully', product });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: error.message });
-        console.log(error.message);
     }
 };
 
@@ -84,25 +74,19 @@ const updateProduct = async (req, res) => {
         const { sellerId, productId } = req.params;
         const { name, price, category, description, quantity } = req.body;
 
-        upload(req, res, async (err) => {
-            if (err) {
-                return res.status(400).json({ message: err.message });
-            }
+        const imagePaths = req.files ? req.files.map(file => file.path) : [];
 
-            const imagePaths = req.files.map(file => file.path);
+        const product = await Product.findOneAndUpdate(
+            { _id: productId, seller: sellerId },
+            { name, price, category, description, quantity, images: imagePaths },
+            { new: true }
+        );
 
-            const product = await Product.findOneAndUpdate(
-                { _id: productId, seller: sellerId },
-                { name, price, category, description, quantity, images: imagePaths },
-                { new: true }
-            );
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found or unauthorized' });
+        }
 
-            if (!product) {
-                return res.status(404).json({ message: 'Product not found or unauthorized' });
-            }
-
-            res.status(200).json({ success: true, message: 'Product updated successfully', product });
-        });
+        res.status(200).json({ success: true, message: 'Product updated successfully', product });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: 'Server error' });
@@ -147,4 +131,5 @@ module.exports = {
     getSellerProductById,
     deleteProduct,
     updateProduct,
+    upload // Export the upload middleware
 };
